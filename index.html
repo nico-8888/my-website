@@ -3,9 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>継続サポート</title>
-  <script src="/_sdk/data_sdk.js"></script>
-  <script src="/_sdk/element_sdk.js"></script>
+  <title>継続サポート - マルチユーザー版</title>
   <style>
     body {
       box-sizing: border-box;
@@ -74,7 +72,8 @@
     }
     
     input[type="text"],
-    input[type="number"] {
+    input[type="number"],
+    select {
       width: 100%;
       padding: 12px 16px;
       border: 2px solid #e0e0e0;
@@ -85,7 +84,8 @@
     }
     
     input[type="text"]:focus,
-    input[type="number"]:focus {
+    input[type="number"]:focus,
+    select:focus {
       outline: none;
       border-color: #667eea;
     }
@@ -150,6 +150,15 @@
     
     .btn-secondary:hover {
       background: #e5e7eb;
+    }
+    
+    .btn-warning {
+      background: #f59e0b;
+      color: white;
+    }
+    
+    .btn-warning:hover {
+      background: #d97706;
     }
     
     .stats-card {
@@ -248,25 +257,103 @@
       font-weight: 700;
       color: #667eea;
     }
+    
+    .user-info {
+      background: #f0f9ff;
+      border: 2px solid #0ea5e9;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 24px;
+      text-align: center;
+      color: #0c4a6e;
+      font-weight: 600;
+    }
+    
+    .user-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    
+    .user-card {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .user-card:hover {
+      border-color: #667eea;
+      background: #f1f5f9;
+      transform: translateY(-2px);
+    }
+    
+    .user-card.selected {
+      border-color: #667eea;
+      background: #e0e7ff;
+    }
+    
+    .user-avatar {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    
+    .user-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+    }
+    
+    .debug-info {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 16px 0;
+      font-size: 12px;
+      color: #92400e;
+      display: none;
+    }
   </style>
   <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
  </head>
  <body>
-  <div class="container"><!-- 初期設定画面 -->
-   <div id="setupScreen" class="screen active">
-    <h1 id="appTitle">継続サポート</h1>
-    <p class="subtitle" id="welcomeMessage">目標達成を応援します！</p>
-    <div class="input-group"><label for="nicknameInput">ニックネーム</label> <input type="text" id="nicknameInput" placeholder="あなたのニックネームを入力">
-    </div><button class="btn btn-primary" id="setupNextBtn" disabled>次へ</button>
-   </div><!-- 目標設定画面 -->
-   <div id="goalScreen" class="screen">
+  <div class="container"><!-- ユーザー選択画面 -->
+   <div id="userSelectScreen" class="screen active">
+    <h1>継続サポート</h1>
+    <p class="subtitle">使用するユーザーを選択してください</p>
+    <div class="user-grid" id="userGrid"><!-- ユーザーカードがここに動的に生成されます -->
+    </div><button class="btn btn-secondary" id="addUserBtn">新しいユーザーを追加</button>
+    <div class="debug-info" id="debugInfo">
+     デバッグ情報がここに表示されます
+    </div>
+   </div><!-- 新規ユーザー作成画面 -->
+   <div id="newUserScreen" class="screen">
+    <h1>新しいユーザー</h1>
+    <p class="subtitle">新しいユーザーを作成します</p>
+    <div class="input-group"><label for="newUserNameInput">ユーザー名</label> <input type="text" id="newUserNameInput" placeholder="例: 田中太郎">
+    </div>
+    <div class="input-group"><label for="newUserAvatarSelect">アバター</label> <select id="newUserAvatarSelect"> <option value="🌟">🌟 星</option> <option value="🚀">🚀 ロケット</option> <option value="💪">💪 筋肉</option> <option value="🏆">🏆 トロフィー</option> <option value="🌱">🌱 新芽</option> <option value="⭐">⭐ 星</option> <option value="🎯">🎯 的</option> <option value="🔥">🔥 炎</option> <option value="💎">💎 ダイヤ</option> <option value="🌈">🌈 虹</option> </select>
+    </div><button class="btn btn-primary" id="createUserBtn" disabled>ユーザーを作成</button> <button class="btn btn-secondary" id="cancelNewUserBtn">キャンセル</button>
+   </div><!-- 初期設定画面 -->
+   <div id="setupScreen" class="screen">
+    <div class="user-info" id="currentUserInfo"><!-- 現在のユーザー情報がここに表示されます -->
+    </div>
     <h1>目標設定</h1>
     <p class="subtitle">達成したい目標を設定しましょう</p>
     <div class="input-group"><label for="targetDaysInput">継続日数</label> <input type="number" id="targetDaysInput" placeholder="例: 30" min="1">
-    </div><button class="btn btn-primary" id="goalNextBtn" disabled>次へ</button>
+    </div><button class="btn btn-primary" id="setupNextBtn" disabled>次へ</button> <button class="btn btn-secondary" id="backToUserSelectBtn">ユーザー選択に戻る</button>
    </div><!-- 頻度設定画面 -->
    <div id="frequencyScreen" class="screen">
+    <div class="user-info" id="currentUserInfo2"><!-- 現在のユーザー情報がここに表示されます -->
+    </div>
     <h1>頻度設定</h1>
     <p class="subtitle">実施頻度を確認しましょう</p>
     <div class="progress-info">
@@ -279,7 +366,9 @@
     </div><button class="btn btn-primary" id="startBtn">スタート</button>
    </div><!-- ホーム画面 -->
    <div id="homeScreen" class="screen">
-    <h1 id="homeTitle">継続サポート</h1>
+    <div class="user-info" id="currentUserInfo3"><!-- 現在のユーザー情報がここに表示されます -->
+    </div>
+    <h1>継続サポート</h1>
     <div class="stats-card">
      <div class="stats-label">
       現在の継続日数
@@ -300,24 +389,28 @@
      </div>
     </div>
     <div class="avatar-container">
-     <div class="avatar">
-      🎯
+     <div class="avatar" id="homeAvatar">
+      🌟
      </div>
     </div>
     <div id="messageContainer"></div>
-    <div class="button-group"><button class="btn btn-danger" id="failBtn"> <span id="failBtnText">できなかった</span> </button> <button class="btn btn-success" id="continueBtn" style="margin-left: auto;"> <span id="continueBtnText">継続できた</span> ✨ </button> <button class="btn btn-secondary" id="avatarBtn">アバター 🎬</button> <button class="btn btn-secondary" id="videoBtn" style="display: none;">動画 🎥</button>
+    <div class="button-group"><button class="btn btn-danger" id="failBtn"> できなかった </button> <button class="btn btn-success" id="continueBtn" style="margin-left: auto;"> 継続できた ✨ </button> <button class="btn btn-secondary" id="avatarBtn">アバター 🎬</button> <button class="btn btn-secondary" id="videoBtn" style="display: none;">動画 🎥</button> <button class="btn btn-warning" id="switchUserBtn">ユーザー切替</button>
     </div>
    </div><!-- アバター動画画面 -->
    <div id="avatarVideoScreen" class="screen">
+    <div class="user-info" id="currentUserInfo4"><!-- 現在のユーザー情報がここに表示されます -->
+    </div>
     <h1>アバター</h1>
     <div class="video-container">
-     <div class="video-placeholder">
+     <div class="video-placeholder" id="avatarVideoPlaceholder">
       🎉
      </div>
      <p style="color: #666; margin-top: 16px;">アバターが応援しています！</p>
     </div><button class="btn btn-secondary" id="backFromAvatarBtn">戻る</button>
    </div><!-- 動画画面 -->
    <div id="videoScreen" class="screen">
+    <div class="user-info" id="currentUserInfo5"><!-- 現在のユーザー情報がここに表示されます -->
+    </div>
     <h1>おめでとうございます！</h1>
     <div class="video-container">
      <div class="video-placeholder">
@@ -329,186 +422,266 @@
    </div>
   </div>
   <script>
+    let currentUser = null;
     let userData = null;
     let currentStreak = 0;
     let targetDays = 0;
     let lastCompletedDate = null;
     
-    const defaultConfig = {
-      app_title: "継続サポート",
-      welcome_message: "目標達成を応援します！",
-      continue_button_text: "継続できた",
-      failed_button_text: "できなかった",
-      primary_color: "#667eea",
-      secondary_color: "#10b981",
-      danger_color: "#ef4444",
-      text_color: "#333333",
-      background_color: "#764ba2"
-    };
+    // デバッグ用関数
+    function debugLog(message) {
+      console.log('[継続サポート]', message);
+      const debugInfo = document.getElementById('debugInfo');
+      if (debugInfo) {
+        debugInfo.style.display = 'block';
+        debugInfo.textContent = message;
+        setTimeout(() => {
+          debugInfo.style.display = 'none';
+        }, 3000);
+      }
+    }
     
-    const dataHandler = {
-      onDataChanged(data) {
-        if (data.length > 0) {
-          userData = data[0];
+    // LocalStorage管理（エラーハンドリング強化）
+    function saveUserData(userId, data) {
+      try {
+        const key = `continuityApp_user_${userId}`;
+        const jsonData = JSON.stringify(data);
+        localStorage.setItem(key, jsonData);
+        debugLog(`ユーザーデータ保存成功: ${userId}`);
+        return true;
+      } catch (error) {
+        console.error('ユーザーデータ保存エラー:', error);
+        debugLog(`保存エラー: ${error.message}`);
+        return false;
+      }
+    }
+    
+    function loadUserData(userId) {
+      try {
+        const key = `continuityApp_user_${userId}`;
+        const saved = localStorage.getItem(key);
+        if (saved) {
+          const data = JSON.parse(saved);
+          debugLog(`ユーザーデータ読み込み成功: ${userId}`);
+          return data;
+        }
+        debugLog(`ユーザーデータなし: ${userId}`);
+        return null;
+      } catch (error) {
+        console.error('ユーザーデータ読み込みエラー:', error);
+        debugLog(`読み込みエラー: ${error.message}`);
+        return null;
+      }
+    }
+    
+    function saveUserList(users) {
+      try {
+        localStorage.setItem('continuityApp_users', JSON.stringify(users));
+        debugLog('ユーザーリスト保存成功');
+        return true;
+      } catch (error) {
+        console.error('ユーザーリスト保存エラー:', error);
+        debugLog(`リスト保存エラー: ${error.message}`);
+        return false;
+      }
+    }
+    
+    function loadUserList() {
+      try {
+        const saved = localStorage.getItem('continuityApp_users');
+        const users = saved ? JSON.parse(saved) : [];
+        debugLog(`ユーザーリスト読み込み: ${users.length}人`);
+        return users;
+      } catch (error) {
+        console.error('ユーザーリスト読み込みエラー:', error);
+        debugLog(`リスト読み込みエラー: ${error.message}`);
+        return [];
+      }
+    }
+    
+    function generateUserId() {
+      return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+    
+    function initApp() {
+      debugLog('アプリ初期化開始');
+      try {
+        renderUserGrid();
+        debugLog('アプリ初期化完了');
+      } catch (error) {
+        console.error('アプリ初期化エラー:', error);
+        debugLog(`初期化エラー: ${error.message}`);
+      }
+    }
+    
+    function renderUserGrid() {
+      try {
+        const users = loadUserList();
+        const userGrid = document.getElementById('userGrid');
+        
+        if (!userGrid) {
+          throw new Error('userGrid要素が見つかりません');
+        }
+        
+        userGrid.innerHTML = '';
+        
+        users.forEach(user => {
+          const userCard = document.createElement('div');
+          userCard.className = 'user-card';
+          userCard.innerHTML = `
+            <div class="user-avatar">${user.avatar}</div>
+            <div class="user-name">${user.name}</div>
+          `;
+          userCard.addEventListener('click', () => selectUser(user));
+          userGrid.appendChild(userCard);
+        });
+        
+        debugLog(`ユーザーグリッド表示: ${users.length}人`);
+      } catch (error) {
+        console.error('ユーザーグリッド表示エラー:', error);
+        debugLog(`グリッド表示エラー: ${error.message}`);
+      }
+    }
+    
+    function selectUser(user) {
+      try {
+        debugLog(`ユーザー選択: ${user.name}`);
+        currentUser = user;
+        const saved = loadUserData(user.id);
+        
+        if (saved && saved.target_days) {
+          // 既存ユーザーでデータがある場合
+          userData = saved;
           currentStreak = userData.current_streak || 0;
           targetDays = userData.target_days || 0;
           lastCompletedDate = userData.last_completed_date || null;
           
+          updateCurrentUserInfo();
           updateHomeScreen();
           showScreen('homeScreen');
+          debugLog('既存ユーザーでホーム画面表示');
+        } else {
+          // 新規ユーザーまたは初期設定が必要な場合
+          updateCurrentUserInfo();
+          showScreen('setupScreen');
+          debugLog('新規ユーザーで設定画面表示');
         }
+      } catch (error) {
+        console.error('ユーザー選択エラー:', error);
+        debugLog(`ユーザー選択エラー: ${error.message}`);
+        showMessage('ユーザー選択でエラーが発生しました', true);
       }
-    };
+    }
     
-    async function initApp() {
-      const initResult = await window.dataSdk.init(dataHandler);
-      if (!initResult.isOk) {
-        console.error("Failed to initialize data SDK");
-        return;
-      }
-      
-      if (window.elementSdk) {
-        window.elementSdk.init({
-          defaultConfig,
-          onConfigChange: async (config) => {
-            const appTitle = config.app_title || defaultConfig.app_title;
-            const welcomeMessage = config.welcome_message || defaultConfig.welcome_message;
-            const continueButtonText = config.continue_button_text || defaultConfig.continue_button_text;
-            const failedButtonText = config.failed_button_text || defaultConfig.failed_button_text;
-            const primaryColor = config.primary_color || defaultConfig.primary_color;
-            const secondaryColor = config.secondary_color || defaultConfig.secondary_color;
-            const dangerColor = config.danger_color || defaultConfig.danger_color;
-            const textColor = config.text_color || defaultConfig.text_color;
-            const backgroundColor = config.background_color || defaultConfig.background_color;
-            
-            document.getElementById('appTitle').textContent = appTitle;
-            document.getElementById('welcomeMessage').textContent = welcomeMessage;
-            document.getElementById('homeTitle').textContent = appTitle;
-            document.getElementById('continueBtnText').textContent = continueButtonText;
-            document.getElementById('failBtnText').textContent = failedButtonText;
-            
-            document.body.style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${backgroundColor} 100%)`;
-            
-            const h1Elements = document.querySelectorAll('h1');
-            h1Elements.forEach(el => el.style.color = primaryColor);
-            
-            const statsCard = document.querySelector('.stats-card');
-            if (statsCard) {
-              statsCard.style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${backgroundColor} 100%)`;
-            }
-            
-            const btnPrimary = document.querySelectorAll('.btn-primary');
-            btnPrimary.forEach(btn => {
-              btn.style.background = primaryColor;
-            });
-            
-            const btnSuccess = document.querySelectorAll('.btn-success');
-            btnSuccess.forEach(btn => {
-              btn.style.background = secondaryColor;
-            });
-            
-            const btnDanger = document.querySelectorAll('.btn-danger');
-            btnDanger.forEach(btn => {
-              btn.style.background = dangerColor;
-            });
-            
-            const progressDays = document.querySelectorAll('.progress-days');
-            progressDays.forEach(el => el.style.color = primaryColor);
-          },
-          mapToCapabilities: (config) => ({
-            recolorables: [
-              {
-                get: () => config.primary_color || defaultConfig.primary_color,
-                set: (value) => {
-                  if (window.elementSdk) {
-                    window.elementSdk.setConfig({ primary_color: value });
-                  }
-                }
-              },
-              {
-                get: () => config.secondary_color || defaultConfig.secondary_color,
-                set: (value) => {
-                  if (window.elementSdk) {
-                    window.elementSdk.setConfig({ secondary_color: value });
-                  }
-                }
-              },
-              {
-                get: () => config.danger_color || defaultConfig.danger_color,
-                set: (value) => {
-                  if (window.elementSdk) {
-                    window.elementSdk.setConfig({ danger_color: value });
-                  }
-                }
-              },
-              {
-                get: () => config.text_color || defaultConfig.text_color,
-                set: (value) => {
-                  if (window.elementSdk) {
-                    window.elementSdk.setConfig({ text_color: value });
-                  }
-                }
-              },
-              {
-                get: () => config.background_color || defaultConfig.background_color,
-                set: (value) => {
-                  if (window.elementSdk) {
-                    window.elementSdk.setConfig({ background_color: value });
-                  }
-                }
-              }
-            ],
-            borderables: [],
-            fontEditable: undefined,
-            fontSizeable: undefined
-          }),
-          mapToEditPanelValues: (config) => new Map([
-            ["app_title", config.app_title || defaultConfig.app_title],
-            ["welcome_message", config.welcome_message || defaultConfig.welcome_message],
-            ["continue_button_text", config.continue_button_text || defaultConfig.continue_button_text],
-            ["failed_button_text", config.failed_button_text || defaultConfig.failed_button_text]
-          ])
+    function updateCurrentUserInfo() {
+      try {
+        if (!currentUser) {
+          debugLog('currentUserが設定されていません');
+          return;
+        }
+        
+        const userInfos = document.querySelectorAll('[id^="currentUserInfo"]');
+        userInfos.forEach(info => {
+          info.innerHTML = `${currentUser.avatar} ${currentUser.name}`;
         });
+        
+        // ホーム画面のアバターも更新
+        const homeAvatar = document.getElementById('homeAvatar');
+        if (homeAvatar) {
+          homeAvatar.textContent = currentUser.avatar;
+        }
+        
+        // アバター動画画面のアバターも更新
+        const avatarVideoPlaceholder = document.getElementById('avatarVideoPlaceholder');
+        if (avatarVideoPlaceholder) {
+          avatarVideoPlaceholder.textContent = currentUser.avatar;
+        }
+        
+        debugLog('ユーザー情報表示更新完了');
+      } catch (error) {
+        console.error('ユーザー情報更新エラー:', error);
+        debugLog(`ユーザー情報更新エラー: ${error.message}`);
       }
     }
     
     function showScreen(screenId) {
-      document.querySelectorAll('.screen').forEach(screen => {
-        screen.classList.remove('active');
-      });
-      document.getElementById(screenId).classList.add('active');
+      try {
+        debugLog(`画面切替: ${screenId}`);
+        document.querySelectorAll('.screen').forEach(screen => {
+          screen.classList.remove('active');
+        });
+        
+        const targetScreen = document.getElementById(screenId);
+        if (!targetScreen) {
+          throw new Error(`画面が見つかりません: ${screenId}`);
+        }
+        
+        targetScreen.classList.add('active');
+        debugLog(`画面切替完了: ${screenId}`);
+      } catch (error) {
+        console.error('画面切替エラー:', error);
+        debugLog(`画面切替エラー: ${error.message}`);
+      }
     }
     
     function showMessage(text, isError = false) {
-      const container = document.getElementById('messageContainer');
-      const message = document.createElement('div');
-      message.className = isError ? 'message error' : 'message';
-      message.textContent = text;
-      container.innerHTML = '';
-      container.appendChild(message);
-      
-      setTimeout(() => {
-        message.remove();
-      }, 3000);
+      try {
+        const container = document.getElementById('messageContainer');
+        if (!container) {
+          debugLog('messageContainer要素が見つかりません');
+          return;
+        }
+        
+        const message = document.createElement('div');
+        message.className = isError ? 'message error' : 'message';
+        message.textContent = text;
+        container.innerHTML = '';
+        container.appendChild(message);
+        
+        setTimeout(() => {
+          if (message.parentNode) {
+            message.remove();
+          }
+        }, 3000);
+        
+        debugLog(`メッセージ表示: ${text}`);
+      } catch (error) {
+        console.error('メッセージ表示エラー:', error);
+        debugLog(`メッセージ表示エラー: ${error.message}`);
+      }
     }
     
     function updateHomeScreen() {
-      document.getElementById('streakNumber').textContent = currentStreak;
-      
-      const remaining = Math.max(0, targetDays - currentStreak);
-      document.getElementById('remainingDays').textContent = `${remaining} 日`;
-      
-      const today = new Date().toISOString().split('T')[0];
-      const canClickToday = lastCompletedDate !== today;
-      
-      const continueBtn = document.getElementById('continueBtn');
-      continueBtn.disabled = !canClickToday;
-      
-      const videoBtn = document.getElementById('videoBtn');
-      if (currentStreak >= 2) {
-        videoBtn.style.display = 'block';
-      } else {
-        videoBtn.style.display = 'none';
+      try {
+        const streakElement = document.getElementById('streakNumber');
+        const remainingElement = document.getElementById('remainingDays');
+        
+        if (!streakElement || !remainingElement) {
+          throw new Error('ホーム画面の要素が見つかりません');
+        }
+        
+        streakElement.textContent = currentStreak;
+        
+        const remaining = Math.max(0, targetDays - currentStreak);
+        remainingElement.textContent = `${remaining} 日`;
+        
+        const today = new Date().toISOString().split('T')[0];
+        const canClickToday = lastCompletedDate !== today;
+        
+        const continueBtn = document.getElementById('continueBtn');
+        if (continueBtn) {
+          continueBtn.disabled = !canClickToday;
+        }
+        
+        const videoBtn = document.getElementById('videoBtn');
+        if (videoBtn) {
+          videoBtn.style.display = currentStreak >= 2 ? 'block' : 'none';
+        }
+        
+        debugLog(`ホーム画面更新: 継続${currentStreak}日, 残り${remaining}日`);
+      } catch (error) {
+        console.error('ホーム画面更新エラー:', error);
+        debugLog(`ホーム画面更新エラー: ${error.message}`);
       }
     }
     
@@ -517,22 +690,62 @@
     }
     
     // イベントリスナー
-    document.getElementById('nicknameInput').addEventListener('input', (e) => {
-      document.getElementById('setupNextBtn').disabled = e.target.value.trim() === '';
+    document.getElementById('addUserBtn').addEventListener('click', () => {
+      showScreen('newUserScreen');
     });
     
-    document.getElementById('setupNextBtn').addEventListener('click', () => {
-      const nickname = document.getElementById('nicknameInput').value.trim();
-      if (nickname) {
-        showScreen('goalScreen');
+    document.getElementById('newUserNameInput').addEventListener('input', (e) => {
+      document.getElementById('createUserBtn').disabled = e.target.value.trim() === '';
+    });
+    
+    document.getElementById('createUserBtn').addEventListener('click', () => {
+      try {
+        const name = document.getElementById('newUserNameInput').value.trim();
+        const avatar = document.getElementById('newUserAvatarSelect').value;
+        
+        if (!name) {
+          showMessage('ユーザー名を入力してください', true);
+          return;
+        }
+        
+        const users = loadUserList();
+        const newUser = {
+          id: generateUserId(),
+          name: name,
+          avatar: avatar
+        };
+        
+        users.push(newUser);
+        const saved = saveUserList(users);
+        
+        if (!saved) {
+          showMessage('ユーザーの作成に失敗しました', true);
+          return;
+        }
+        
+        document.getElementById('newUserNameInput').value = '';
+        document.getElementById('newUserAvatarSelect').value = '🌟';
+        
+        renderUserGrid();
+        showScreen('userSelectScreen');
+        showMessage('ユーザーを作成しました！');
+      } catch (error) {
+        console.error('ユーザー作成エラー:', error);
+        showMessage('ユーザー作成でエラーが発生しました', true);
       }
     });
     
-    document.getElementById('targetDaysInput').addEventListener('input', (e) => {
-      document.getElementById('goalNextBtn').disabled = !e.target.value || e.target.value <= 0;
+    document.getElementById('cancelNewUserBtn').addEventListener('click', () => {
+      document.getElementById('newUserNameInput').value = '';
+      document.getElementById('newUserAvatarSelect').value = '🌟';
+      showScreen('userSelectScreen');
     });
     
-    document.getElementById('goalNextBtn').addEventListener('click', () => {
+    document.getElementById('targetDaysInput').addEventListener('input', (e) => {
+      document.getElementById('setupNextBtn').disabled = !e.target.value || e.target.value <= 0;
+    });
+    
+    document.getElementById('setupNextBtn').addEventListener('click', () => {
       const days = parseInt(document.getElementById('targetDaysInput').value);
       if (days > 0) {
         targetDays = days;
@@ -540,86 +753,167 @@
       }
     });
     
-    document.getElementById('startBtn').addEventListener('click', async () => {
-      const nickname = document.getElementById('nicknameInput').value.trim();
-      const days = parseInt(document.getElementById('targetDaysInput').value);
-      
-      const startBtn = document.getElementById('startBtn');
-      startBtn.disabled = true;
-      startBtn.textContent = '作成中...';
-      
-      const result = await window.dataSdk.create({
-        id: 'user_data',
-        type: 'user',
-        nickname: nickname,
-        target_days: days,
-        current_streak: 0,
-        last_completed_date: '',
-        created_at: new Date().toISOString()
-      });
-      
-      startBtn.disabled = false;
-      startBtn.textContent = 'スタート';
-      
-      if (result.isOk) {
-        showMessage('設定が完了しました！');
-      } else {
-        showMessage('エラーが発生しました。もう一度お試しください。', true);
-      }
+    document.getElementById('backToUserSelectBtn').addEventListener('click', () => {
+      showScreen('userSelectScreen');
     });
     
-    document.getElementById('continueBtn').addEventListener('click', async () => {
-      const today = getTodayString();
-      
-      if (lastCompletedDate === today) {
-        showMessage('今日はすでに記録済みです！', true);
-        return;
-      }
-      
-      const continueBtn = document.getElementById('continueBtn');
-      continueBtn.disabled = true;
-      continueBtn.innerHTML = '記録中... ✨';
-      
-      const newStreak = currentStreak + 1;
-      
-      const result = await window.dataSdk.update({
-        ...userData,
-        current_streak: newStreak,
-        last_completed_date: today
-      });
-      
-      continueBtn.disabled = false;
-      continueBtn.innerHTML = `<span id="continueBtnText">${window.elementSdk?.config?.continue_button_text || defaultConfig.continue_button_text}</span> ✨`;
-      
-      if (result.isOk) {
-        showMessage(`素晴らしい！${newStreak}日継続中です！`);
+    document.getElementById('startBtn').addEventListener('click', () => {
+      try {
+        const days = parseInt(document.getElementById('targetDaysInput').value);
         
-        if (newStreak >= targetDays) {
-          showMessage(`🎉 目標達成おめでとうございます！ 🎉`);
+        if (!days || days <= 0) {
+          showMessage('有効な日数を入力してください', true);
+          return;
         }
-      } else {
-        showMessage('エラーが発生しました。もう一度お試しください。', true);
+        
+        if (!currentUser) {
+          showMessage('ユーザー情報が見つかりません', true);
+          return;
+        }
+        
+        const startBtn = document.getElementById('startBtn');
+        startBtn.disabled = true;
+        startBtn.textContent = '作成中...';
+        
+        debugLog('設定保存開始');
+        
+        userData = {
+          id: currentUser.id,
+          name: currentUser.name,
+          avatar: currentUser.avatar,
+          target_days: days,
+          current_streak: 0,
+          last_completed_date: '',
+          created_at: new Date().toISOString()
+        };
+        
+        currentStreak = 0;
+        targetDays = days;
+        lastCompletedDate = null;
+        
+        // LocalStorageへの保存を試行
+        const saved = saveUserData(currentUser.id, userData);
+        
+        if (!saved) {
+          throw new Error('データの保存に失敗しました');
+        }
+        
+        // 保存確認
+        const loadedData = loadUserData(currentUser.id);
+        if (!loadedData) {
+          throw new Error('保存されたデータの確認に失敗しました');
+        }
+        
+        setTimeout(() => {
+          try {
+            startBtn.disabled = false;
+            startBtn.textContent = 'スタート';
+            updateCurrentUserInfo();
+            updateHomeScreen();
+            showMessage('設定が完了しました！');
+            showScreen('homeScreen');
+            debugLog('設定完了、ホーム画面表示');
+          } catch (error) {
+            console.error('画面遷移エラー:', error);
+            showMessage('画面の表示でエラーが発生しました', true);
+            startBtn.disabled = false;
+            startBtn.textContent = 'スタート';
+          }
+        }, 300);
+        
+      } catch (error) {
+        console.error('設定保存エラー:', error);
+        showMessage('設定の保存でエラーが発生しました', true);
+        const startBtn = document.getElementById('startBtn');
+        startBtn.disabled = false;
+        startBtn.textContent = 'スタート';
       }
     });
     
-    document.getElementById('failBtn').addEventListener('click', async () => {
-      const failBtn = document.getElementById('failBtn');
-      failBtn.disabled = true;
-      failBtn.textContent = 'リセット中...';
-      
-      const result = await window.dataSdk.update({
-        ...userData,
-        current_streak: 0,
-        last_completed_date: ''
-      });
-      
-      failBtn.disabled = false;
-      failBtn.innerHTML = `<span id="failBtnText">${window.elementSdk?.config?.failed_button_text || defaultConfig.failed_button_text}</span>`;
-      
-      if (result.isOk) {
-        showMessage('また新しくスタートしましょう！');
-      } else {
-        showMessage('エラーが発生しました。もう一度お試しください。', true);
+    document.getElementById('continueBtn').addEventListener('click', () => {
+      try {
+        const today = getTodayString();
+        
+        if (lastCompletedDate === today) {
+          showMessage('今日はすでに記録済みです！', true);
+          return;
+        }
+        
+        const continueBtn = document.getElementById('continueBtn');
+        continueBtn.disabled = true;
+        continueBtn.innerHTML = '記録中... ✨';
+        
+        const newStreak = currentStreak + 1;
+        
+        setTimeout(() => {
+          try {
+            userData.current_streak = newStreak;
+            userData.last_completed_date = today;
+            currentStreak = newStreak;
+            lastCompletedDate = today;
+            
+            const saved = saveUserData(currentUser.id, userData);
+            
+            if (!saved) {
+              throw new Error('継続記録の保存に失敗しました');
+            }
+            
+            continueBtn.disabled = false;
+            continueBtn.innerHTML = '継続できた ✨';
+            
+            updateHomeScreen();
+            showMessage(`素晴らしい！${newStreak}日継続中です！`);
+            
+            if (newStreak >= targetDays) {
+              showMessage(`🎉 目標達成おめでとうございます！ 🎉`);
+            }
+          } catch (error) {
+            console.error('継続記録エラー:', error);
+            showMessage('継続記録の保存でエラーが発生しました', true);
+            continueBtn.disabled = false;
+            continueBtn.innerHTML = '継続できた ✨';
+          }
+        }, 500);
+      } catch (error) {
+        console.error('継続ボタンエラー:', error);
+        showMessage('継続記録でエラーが発生しました', true);
+      }
+    });
+    
+    document.getElementById('failBtn').addEventListener('click', () => {
+      try {
+        const failBtn = document.getElementById('failBtn');
+        failBtn.disabled = true;
+        failBtn.textContent = 'リセット中...';
+        
+        setTimeout(() => {
+          try {
+            userData.current_streak = 0;
+            userData.last_completed_date = '';
+            currentStreak = 0;
+            lastCompletedDate = null;
+            
+            const saved = saveUserData(currentUser.id, userData);
+            
+            if (!saved) {
+              throw new Error('リセットデータの保存に失敗しました');
+            }
+            
+            failBtn.disabled = false;
+            failBtn.textContent = 'できなかった';
+            
+            updateHomeScreen();
+            showMessage('また新しくスタートしましょう！');
+          } catch (error) {
+            console.error('リセットエラー:', error);
+            showMessage('リセットでエラーが発生しました', true);
+            failBtn.disabled = false;
+            failBtn.textContent = 'できなかった';
+          }
+        }, 500);
+      } catch (error) {
+        console.error('失敗ボタンエラー:', error);
+        showMessage('リセット処理でエラーが発生しました', true);
       }
     });
     
@@ -631,6 +925,10 @@
       showScreen('videoScreen');
     });
     
+    document.getElementById('switchUserBtn').addEventListener('click', () => {
+      showScreen('userSelectScreen');
+    });
+    
     document.getElementById('backFromAvatarBtn').addEventListener('click', () => {
       showScreen('homeScreen');
     });
@@ -639,7 +937,13 @@
       showScreen('homeScreen');
     });
     
-    initApp();
+    // アプリ初期化
+    try {
+      initApp();
+    } catch (error) {
+      console.error('アプリ起動エラー:', error);
+      debugLog(`起動エラー: ${error.message}`);
+    }
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99b3e8add51fed81',t:'MTc2MjU5MjcyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99b400160681ed81',t:'MTc2MjU5MzY4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
