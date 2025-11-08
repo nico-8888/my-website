@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="ja">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>継続サポート</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    html {
+      height: 100%;
+    }
+    
+    .container {
+      width: 90%;
+      max-width: 500px;
+      background: white;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    .screen {
+      display: none;
+    }
+    
+    .screen.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    h1 {
+      font-size: 28px;
+      color: #667eea;
+      margin: 0 0 8px 0;
+      text-align: center;
+    }
+    
+    .subtitle {
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    
+    .input-group {
+      margin-bottom: 24px;
+    }
+    
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+      box-sizing: border-box;
+    }
+    
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 16px;
+    }
+    
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn-success {
+      background: #10b981;
+      color: white;
+      font-size: 18px;
+      padding: 20px;
+    }
+    
+    .btn-success:hover:not(:disabled) {
+      background: #059669;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+    
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #dc2626;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #666;
+    }
+    
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+    
+    .stats-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px;
+      padding: 24px;
+      color: white;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    
+    .stats-number {
+      font-size: 48px;
+      font-weight: 700;
+      margin: 8px 0;
+    }
+    
+    .stats-label {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .avatar-container {
+      text-align: center;
+      margin: 24px 0;
+    }
+    
+    .avatar {
+      font-size: 80px;
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .button-group {
+      display: grid;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    
+    .video-container {
+      background: #f9fafb;
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      margin: 24px 0;
+    }
+    
+    .video-placeholder {
+      font-size: 64px;
+      margin: 16px 0;
+      animation: dance 1s infinite;
+    }
+    
+    @keyframes dance {
+      0%, 100% { transform: rotate(-5deg); }
+      50% { transform: rotate(5deg); }
+    }
+    
+    .message {
+      background: #f0fdf4;
+      border: 2px solid #10b981;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 16px 0;
+      text-align: center;
+      color: #065f46;
+      font-weight: 600;
+    }
+    
+    .message.error {
+      background: #fef2f2;
+      border-color: #ef4444;
+      color: #991b1b;
+    }
+    
+    .progress-info {
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    
+    .progress-text {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    
+    .progress-days {
+      font-size: 20px;
+      font-weight: 700;
+      color: #667eea;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="container"><!-- 初期設定画面 -->
+   <div id="setupScreen" class="screen active">
+    <h1 id="appTitle">継続サポート</h1>
+    <p class="subtitle" id="welcomeMessage">目標達成を応援します！</p>
+    <div class="input-group"><label for="nicknameInput">ニックネーム</label> <input type="text" id="nicknameInput" placeholder="あなたのニックネームを入力">
+    </div><button class="btn btn-primary" id="setupNextBtn" disabled>次へ</button>
+   </div><!-- 目標設定画面 -->
+   <div id="goalScreen" class="screen">
+    <h1>目標設定</h1>
+    <p class="subtitle">達成したい目標を設定しましょう</p>
+    <div class="input-group"><label for="targetDaysInput">継続日数</label> <input type="number" id="targetDaysInput" placeholder="例: 30" min="1">
+    </div><button class="btn btn-primary" id="goalNextBtn" disabled>次へ</button>
+   </div><!-- 頻度設定画面 -->
+   <div id="frequencyScreen" class="screen">
+    <h1>頻度設定</h1>
+    <p class="subtitle">実施頻度を確認しましょう</p>
+    <div class="progress-info">
+     <div class="progress-text">
+      実施頻度
+     </div>
+     <div class="progress-days">
+      毎日
+     </div>
+    </div><button class="btn btn-primary" id="startBtn">スタート</button>
+   </div><!-- ホーム画面 -->
+   <div id="homeScreen" class="screen">
+    <h1 id="homeTitle">継続サポート</h1>
+    <div class="stats-card">
+     <div class="stats-label">
+      現在の継続日数
+     </div>
+     <div class="stats-number" id="streakNumber">
+      0
+     </div>
+     <div class="stats-label">
+      日
+     </div>
+    </div>
+    <div class="progress-info">
+     <div class="progress-text">
+      目標まで
+     </div>
+     <div class="progress-days" id="remainingDays">
+      -- 日
+     </div>
+    </div>
+    <div class="avatar-container">
+     <div class="avatar">
+      🎯
+     </div>
+    </div>
+    <div id="messageContainer"></div>
+    <div class="button-group"><button class="btn btn-danger" id="failBtn"> <span id="failBtnText">できなかった</span> </button> <button class="btn btn-success" id="continueBtn" style="margin-left: auto;"> <span id="continueBtnText">継続できた</span> ✨ </button> <button class="btn btn-secondary" id="avatarBtn">アバター 🎬</button> <button class="btn btn-secondary" id="videoBtn" style="display: none;">動画 🎥</button>
+    </div>
+   </div><!-- アバター動画画面 -->
+   <div id="avatarVideoScreen" class="screen">
+    <h1>アバター</h1>
+    <div class="video-container">
+     <div class="video-placeholder">
+      🎉
+     </div>
+     <p style="color: #666; margin-top: 16px;">アバターが応援しています！</p>
+    </div><button class="btn btn-secondary" id="backFromAvatarBtn">戻る</button>
+   </div><!-- 動画画面 -->
+   <div id="videoScreen" class="screen">
+    <h1>おめでとうございます！</h1>
+    <div class="video-container">
+     <div class="video-placeholder">
+      🎊
+     </div>
+     <p style="color: #666; margin-top: 16px; font-weight: 600;">2日以上継続達成！</p>
+     <p style="color: #666; font-size: 14px;">素晴らしい継続力です！</p>
+    </div><button class="btn btn-secondary" id="backFromVideoBtn">戻る</button>
+   </div>
+  </div>
+  <script>
+    let userData = null;
+    let currentStreak = 0;
+    let targetDays = 0;
+    let lastCompletedDate = null;
+    
+    const defaultConfig = {
+      app_title: "継続サポート",
+      welcome_message: "目標達成を応援します！",
+      continue_button_text: "継続できた",
+      failed_button_text: "できなかった",
+      primary_color: "#667eea",
+      secondary_color: "#10b981",
+      danger_color: "#ef4444",
+      text_color: "#333333",
+      background_color: "#764ba2"
+    };
+    
+    const dataHandler = {
+      onDataChanged(data) {
+        if (data.length > 0) {
+          userData = data[0];
+          currentStreak = userData.current_streak || 0;
+          targetDays = userData.target_days || 0;
+          lastCompletedDate = userData.last_completed_date || null;
+          
+          updateHomeScreen();
+          showScreen('homeScreen');
+        }
+      }
+    };
+    
+    async function initApp() {
+      const initResult = await window.dataSdk.init(dataHandler);
+      if (!initResult.isOk) {
+        console.error("Failed to initialize data SDK");
+        return;
+      }
+      
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (config) => {
+            const appTitle = config.app_title || defaultConfig.app_title;
+            const welcomeMessage = config.welcome_message || defaultConfig.welcome_message;
+            const continueButtonText = config.continue_button_text || defaultConfig.continue_button_text;
+            const failedButtonText = config.failed_button_text || defaultConfig.failed_button_text;
+            const primaryColor = config.primary_color || defaultConfig.primary_color;
+            const secondaryColor = config.secondary_color || defaultConfig.secondary_color;
+            const dangerColor = config.danger_color || defaultConfig.danger_color;
+            const textColor = config.text_color || defaultConfig.text_color;
+            const backgroundColor = config.background_color || defaultConfig.background_color;
+            
+            document.getElementById('appTitle').textContent = appTitle;
+            document.getElementById('welcomeMessage').textContent = welcomeMessage;
+            document.getElementById('homeTitle').textContent = appTitle;
+            document.getElementById('continueBtnText').textContent = continueButtonText;
+            document.getElementById('failBtnText').textContent = failedButtonText;
+            
+            document.body.style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${backgroundColor} 100%)`;
+            
+            const h1Elements = document.querySelectorAll('h1');
+            h1Elements.forEach(el => el.style.color = primaryColor);
+            
+            const statsCard = document.querySelector('.stats-card');
+            if (statsCard) {
+              statsCard.style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${backgroundColor} 100%)`;
+            }
+            
+            const btnPrimary = document.querySelectorAll('.btn-primary');
+            btnPrimary.forEach(btn => {
+              btn.style.background = primaryColor;
+            });
+            
+            const btnSuccess = document.querySelectorAll('.btn-success');
+            btnSuccess.forEach(btn => {
+              btn.style.background = secondaryColor;
+            });
+            
+            const btnDanger = document.querySelectorAll('.btn-danger');
+            btnDanger.forEach(btn => {
+              btn.style.background = dangerColor;
+            });
+            
+            const progressDays = document.querySelectorAll('.progress-days');
+            progressDays.forEach(el => el.style.color = primaryColor);
+          },
+          mapToCapabilities: (config) => ({
+            recolorables: [
+              {
+                get: () => config.primary_color || defaultConfig.primary_color,
+                set: (value) => {
+                  if (window.elementSdk) {
+                    window.elementSdk.setConfig({ primary_color: value });
+                  }
+                }
+              },
+              {
+                get: () => config.secondary_color || defaultConfig.secondary_color,
+                set: (value) => {
+                  if (window.elementSdk) {
+                    window.elementSdk.setConfig({ secondary_color: value });
+                  }
+                }
+              },
+              {
+                get: () => config.danger_color || defaultConfig.danger_color,
+                set: (value) => {
+                  if (window.elementSdk) {
+                    window.elementSdk.setConfig({ danger_color: value });
+                  }
+                }
+              },
+              {
+                get: () => config.text_color || defaultConfig.text_color,
+                set: (value) => {
+                  if (window.elementSdk) {
+                    window.elementSdk.setConfig({ text_color: value });
+                  }
+                }
+              },
+              {
+                get: () => config.background_color || defaultConfig.background_color,
+                set: (value) => {
+                  if (window.elementSdk) {
+                    window.elementSdk.setConfig({ background_color: value });
+                  }
+                }
+              }
+            ],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ["app_title", config.app_title || defaultConfig.app_title],
+            ["welcome_message", config.welcome_message || defaultConfig.welcome_message],
+            ["continue_button_text", config.continue_button_text || defaultConfig.continue_button_text],
+            ["failed_button_text", config.failed_button_text || defaultConfig.failed_button_text]
+          ])
+        });
+      }
+    }
+    
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.remove('active');
+      });
+      document.getElementById(screenId).classList.add('active');
+    }
+    
+    function showMessage(text, isError = false) {
+      const container = document.getElementById('messageContainer');
+      const message = document.createElement('div');
+      message.className = isError ? 'message error' : 'message';
+      message.textContent = text;
+      container.innerHTML = '';
+      container.appendChild(message);
+      
+      setTimeout(() => {
+        message.remove();
+      }, 3000);
+    }
+    
+    function updateHomeScreen() {
+      document.getElementById('streakNumber').textContent = currentStreak;
+      
+      const remaining = Math.max(0, targetDays - currentStreak);
+      document.getElementById('remainingDays').textContent = `${remaining} 日`;
+      
+      const today = new Date().toISOString().split('T')[0];
+      const canClickToday = lastCompletedDate !== today;
+      
+      const continueBtn = document.getElementById('continueBtn');
+      continueBtn.disabled = !canClickToday;
+      
+      const videoBtn = document.getElementById('videoBtn');
+      if (currentStreak >= 2) {
+        videoBtn.style.display = 'block';
+      } else {
+        videoBtn.style.display = 'none';
+      }
+    }
+    
+    function getTodayString() {
+      return new Date().toISOString().split('T')[0];
+    }
+    
+    // イベントリスナー
+    document.getElementById('nicknameInput').addEventListener('input', (e) => {
+      document.getElementById('setupNextBtn').disabled = e.target.value.trim() === '';
+    });
+    
+    document.getElementById('setupNextBtn').addEventListener('click', () => {
+      const nickname = document.getElementById('nicknameInput').value.trim();
+      if (nickname) {
+        showScreen('goalScreen');
+      }
+    });
+    
+    document.getElementById('targetDaysInput').addEventListener('input', (e) => {
+      document.getElementById('goalNextBtn').disabled = !e.target.value || e.target.value <= 0;
+    });
+    
+    document.getElementById('goalNextBtn').addEventListener('click', () => {
+      const days = parseInt(document.getElementById('targetDaysInput').value);
+      if (days > 0) {
+        targetDays = days;
+        showScreen('frequencyScreen');
+      }
+    });
+    
+    document.getElementById('startBtn').addEventListener('click', async () => {
+      const nickname = document.getElementById('nicknameInput').value.trim();
+      const days = parseInt(document.getElementById('targetDaysInput').value);
+      
+      const startBtn = document.getElementById('startBtn');
+      startBtn.disabled = true;
+      startBtn.textContent = '作成中...';
+      
+      const result = await window.dataSdk.create({
+        id: 'user_data',
+        type: 'user',
+        nickname: nickname,
+        target_days: days,
+        current_streak: 0,
+        last_completed_date: '',
+        created_at: new Date().toISOString()
+      });
+      
+      startBtn.disabled = false;
+      startBtn.textContent = 'スタート';
+      
+      if (result.isOk) {
+        showMessage('設定が完了しました！');
+      } else {
+        showMessage('エラーが発生しました。もう一度お試しください。', true);
+      }
+    });
+    
+    document.getElementById('continueBtn').addEventListener('click', async () => {
+      const today = getTodayString();
+      
+      if (lastCompletedDate === today) {
+        showMessage('今日はすでに記録済みです！', true);
+        return;
+      }
+      
+      const continueBtn = document.getElementById('continueBtn');
+      continueBtn.disabled = true;
+      continueBtn.innerHTML = '記録中... ✨';
+      
+      const newStreak = currentStreak + 1;
+      
+      const result = await window.dataSdk.update({
+        ...userData,
+        current_streak: newStreak,
+        last_completed_date: today
+      });
+      
+      continueBtn.disabled = false;
+      continueBtn.innerHTML = `<span id="continueBtnText">${window.elementSdk?.config?.continue_button_text || defaultConfig.continue_button_text}</span> ✨`;
+      
+      if (result.isOk) {
+        showMessage(`素晴らしい！${newStreak}日継続中です！`);
+        
+        if (newStreak >= targetDays) {
+          showMessage(`🎉 目標達成おめでとうございます！ 🎉`);
+        }
+      } else {
+        showMessage('エラーが発生しました。もう一度お試しください。', true);
+      }
+    });
+    
+    document.getElementById('failBtn').addEventListener('click', async () => {
+      const failBtn = document.getElementById('failBtn');
+      failBtn.disabled = true;
+      failBtn.textContent = 'リセット中...';
+      
+      const result = await window.dataSdk.update({
+        ...userData,
+        current_streak: 0,
+        last_completed_date: ''
+      });
+      
+      failBtn.disabled = false;
+      failBtn.innerHTML = `<span id="failBtnText">${window.elementSdk?.config?.failed_button_text || defaultConfig.failed_button_text}</span>`;
+      
+      if (result.isOk) {
+        showMessage('また新しくスタートしましょう！');
+      } else {
+        showMessage('エラーが発生しました。もう一度お試しください。', true);
+      }
+    });
+    
+    document.getElementById('avatarBtn').addEventListener('click', () => {
+      showScreen('avatarVideoScreen');
+    });
+    
+    document.getElementById('videoBtn').addEventListener('click', () => {
+      showScreen('videoScreen');
+    });
+    
+    document.getElementById('backFromAvatarBtn').addEventListener('click', () => {
+      showScreen('homeScreen');
+    });
+    
+    document.getElementById('backFromVideoBtn').addEventListener('click', () => {
+      showScreen('homeScreen');
+    });
+    
+    initApp();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99b3e8add51fed81',t:'MTc2MjU5MjcyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
